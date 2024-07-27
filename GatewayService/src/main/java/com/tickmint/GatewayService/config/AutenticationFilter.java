@@ -17,49 +17,49 @@ import reactor.core.publisher.Mono;
 @Component
 public class AutenticationFilter implements GatewayFilter {
 
-//Inyecta el validador de rutas y el servicio de JWT
+    //Inyecta el validador de rutas y el servicio de JWT
     @Autowired
     private RouterValidator validator;
 
+    //Inyecta el servicio de JWT
     @Autowired
     private JwtUtils jwtUtils;
 
+    //Método que se ejecuta en cada petición
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // Obtiene la solicitud HTTP del intercambio
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain){
+        //Obtiene la solicitud HTTP
         ServerHttpRequest request = exchange.getRequest();
 
-        // Verifica si la ruta está protegida
-        if (validator.isSecured.test(request)) {
-            // Si falta el token de autenticación, retorna un error
-            if (authMissing(request)) {
+        //Verifica si la ruta esta protegida
+        if (validator.isSecured.test(request)){
+            if(authMissing(request)){
                 return onError(exchange);
+                //Si no hay token, retorna un error
             }
-            // Obtiene el token de la cabecera Authorization
-            final String token = request.getHeaders().getOrEmpty("Authorization").get(0).substring(7);;
+            final String token = request.getHeaders().getOrEmpty("Authorization").get(0).substring(7);
 
-
-            // Verifica si el token ha expirado
-            if (jwtUtils.isTokenExpired(token)) {
+            //Si el token ha expirado, retorna un error
+            if (jwtUtils.isTokenExpired(token)){
                 return onError(exchange);
             }
         }
-        // Continúa con el siguiente filtro en la cadena
+        //Continua con el siguiente filtro en la cadena
         return chain.filter(exchange);
     }
 
-// Maneja el error cuando falta el token de autenticación o es inválido
-private Mono<Void> onError(ServerWebExchange exchange) {
-    ServerHttpResponse response = exchange.getResponse();
-    // Configura el código de estado HTTP a 401 Unauthorized
-    response.setStatusCode(HttpStatus.UNAUTHORIZED);
-    // Se genera el mensaje de error y se envía en la respuesta
-    DataBuffer buffer = response.bufferFactory().wrap("Unauthorized".getBytes());
-    return response.writeWith(Mono.just(buffer));
-}
-
-    // Verifica si la cabecera Authorization está presente
     private boolean authMissing(ServerHttpRequest request) {
+        //Verifica si la solicitud no contiene el encabezado de autorización
         return !request.getHeaders().containsKey("Authorization");
     }
+
+    private Mono<Void> onError(ServerWebExchange exchange) {
+        ServerHttpResponse response = exchange.getResponse();
+        //Setea el código de estado de la respuesta
+        response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        //Genera una respuesta completa
+        DataBuffer buffer = response.bufferFactory().wrap("Unauthorized".getBytes());
+        return response.writeWith(Mono.just(buffer));
+    }
+
 }

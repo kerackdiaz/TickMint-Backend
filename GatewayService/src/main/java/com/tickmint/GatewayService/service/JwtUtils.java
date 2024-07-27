@@ -8,36 +8,36 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.function.Function;
 
 @Service
 public class JwtUtils {
 
-    // Variable para almacenar la clave secreta
+    //Variable para almacenar la secret key
     private String secret;
 
-    // Clave secreta estática para firmar y verificar JWT
+    //Clave secreta estatica para firmar y verificar el token
     private static SecretKey SECRET_KEY;
 
-    // Método que se ejecuta después de la construcción del bean
+    //Metodo que se ejecuta despues de la creacion del bean
     @PostConstruct
     public void init() {
-        // Obtiene la clave secreta de las variables de entorno
+        //Obtenemos la secret key del entorno
         String envSecret = System.getenv("jwt.secret");
+        //Si la secret key del entorno no es nula y no esta vacia
         if (envSecret != null && !envSecret.isEmpty()) {
+            //Asignamos la secret key del entorno a la variable secret
             secret = envSecret;
         }
-
-        // Si la clave secreta no está presente en las variables de entorno, lanza una excepción
+        //Si la secret key es nula o esta vacia
         if (secret == null || secret.isEmpty()) {
+            //Lanzamos una excepcion
             throw new IllegalStateException("jwt.secret is missing in both environment variables and application.properties");
         }
-
-        // Genera la clave secreta a partir de la cadena de texto
+        //Asignamos la secret key a la variable SECRET_KEY
         SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    // Método para extraer todos los claims de un token JWT
+    //Metodo para obtener todas las claims del token
     public Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(SECRET_KEY)
@@ -46,7 +46,7 @@ public class JwtUtils {
                 .getPayload();
     }
 
-    // Método para verificar si un token JWT ha expirado
+    //Metodo para verificar si el token ha expirado
     public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
