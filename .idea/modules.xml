@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/GatewayService.iml" filepath="$PROJECT_DIR$/GatewayService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/TickMint-Backend.iml" filepath="$PROJECT_DIR$/.idea/TickMint-Backend.iml" />
+    </modules>
+  </component>
+</project>
